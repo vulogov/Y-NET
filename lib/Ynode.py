@@ -33,10 +33,10 @@ class Ynode:
         self.__setif(kw,"ftix",[])
         self.__setif(kw,"data",None)
         self.__setif(kw,"links",{})
+        self.__setif(kw,"linked",[])
         self.__setif(kw,"created",time.time())
         self.__setif(kw,"updated",time.time())
         self.__setif(kw,"owner","nobody")
-        self.__setif(kw,"acl",{"access":["*"],"modify":["*"],"delete":["*"]})
     def Export(self):
         kw = {}
         self.__getif(kw,"_id")
@@ -45,10 +45,10 @@ class Ynode:
         self.__getif(kw,"ftix")
         self.__getif(kw,"data")
         self.__getif(kw,"links")
+        self.__getif(kw,"linked")
         self.__getif(kw,"created")
         self.__getif(kw,"updated")
         self.__getif(kw,"owner")
-        self.__getif(kw,"acl")
         return kw
     def Link(self, obj, lname="link", probability=100):
         k = "%s:%d"%(lname, probability)
@@ -56,6 +56,9 @@ class Ynode:
             self.links[k] = {}
         if obj._id not in self.links[k]:
             self.links[k][obj.name]=obj._id
+        if self._id not in obj.linked:
+            obj.linked.append(self._id)
+            obj.isStored(True)
         self.isStored(True)
     def __add__(self, obj):
         self.Link(obj, "link", 100)
@@ -68,6 +71,8 @@ class Ynode:
             except:
                 pass
             self.isStored(True)
+        obj.linked.remove(self._id)
+        obj.isStored(True)
     def __sub__(self, obj):
         self.Unlink(obj, "link", 100)
         return self
